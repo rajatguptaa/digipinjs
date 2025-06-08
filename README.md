@@ -150,4 +150,4 @@ npm run lint
 
 ## License
 
-ISC
+MIT
