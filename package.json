@@ -1,22 +1,87 @@
 {
   "name": "digipinjs",
   "version": "1.0.0",
-  "description": "Opinionated wrapper for DIGIPIN geocoding with extras",
+  "description": "A TypeScript wrapper for the DIGIPIN geocoding system, adding CLI, caching, and batch processing support. Original DIGIPIN implementation is licensed under Apache License 2.0 by Department of Posts, India.",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "bin": {
     "digipin-cli": "dist/cli.js"
   },
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE",
+    "NOTICE"
+  ],
   "scripts": {
     "build": "tsc",
     "test": "mocha -r ts-node/register 'src/**/*.test.ts'",
     "test:coverage": "nyc npm test",
     "lint": "eslint src/**/*.ts",
-    "prepare": "npm run build"
+    "prepare": "npm run build",
+    "prepublishOnly": "npm test && npm run lint",
+    "preversion": "npm run lint",
+    "version": "npm run format && git add -A src",
+    "postversion": "git push && git push --tags"
+  },
+  "keywords": [
+    "digipin",
+    "geocoding",
+    "coordinates",
+    "latitude",
+    "longitude",
+    "cli",
+    "typescript",
+    "india",
+    "location",
+    "encoding",
+    "decoding",
+    "wrapper"
+  ],
+  "author": {
+    "name": "Rajat",
+    "url": "https://github.com/rajatguptaa"
+  },
+  "contributors": [
+    {
+      "name": "Department of Posts, Government of India",
+      "url": "https://github.com/CEPT-VZG/digipin"
+    },
+    {
+      "name": "Indian Institute of Technology, Hyderabad",
+      "url": "https://www.iith.ac.in/"
+    },
+    {
+      "name": "National Remote Sensing Centre, ISRO",
+      "url": "https://www.nrsc.gov.in/"
+    }
+  ],
+  "license": "MIT",
+  "licenses": [
+    {
+      "type": "MIT",
+      "url": "https://github.com/rajatguptaa/digipinjs/blob/main/LICENSE"
+    },
+    {
+      "type": "Apache-2.0",
+      "url": "https://github.com/CEPT-VZG/digipin/blob/main/LICENSE"
+    }
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/rajatguptaa/digipinjs.git"
+  },
+  "bugs": {
+    "url": "https://github.com/rajatguptaa/digipinjs/issues"
+  },
+  "homepage": "https://github.com/rajatguptaa/digipinjs#readme",
+  "engines": {
+    "node": ">=14.0.0"
   },
   "dependencies": {
     "bottleneck": "^2.19.5",
     "chalk": "^4.1.2",
+    "digipinjs": "^1.0.0",
     "express": "^4.18.2",
     "lru-cache": "^7.18.3",
     "yargs": "^17.6.2"
@@ -28,13 +93,13 @@
     "@types/mocha": "^10.0.6",
     "@types/node": "^20.2.5",
     "@types/yargs": "^17.0.33",
+    "@typescript-eslint/eslint-plugin": "^8.33.1",
+    "@typescript-eslint/parser": "^8.33.1",
     "chai": "^4.3.10",
     "eslint": "^8.41.0",
     "mocha": "^10.2.0",
     "nyc": "^15.1.0",
     "ts-node": "^10.9.2",
     "typescript": "^5.1.6"
-  },
-  "author": "Rajat",
-  "license": "MIT"
+  }
 }

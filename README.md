@@ -2,28 +2,41 @@
 
 A TypeScript library for encoding and decoding geographic coordinates into DIGIPIN format, with additional features like caching, batch processing, and a command-line interface.
 
+> **Note**: This package is a wrapper and enhancement of the original DIGIPIN implementation by Department of Posts, India. The original DIGIPIN implementation is licensed under Apache License 2.0. This package adds TypeScript support, CLI tools, caching, and other enhancements while maintaining compatibility with the original format.
+
+## Attribution
+
+This package is based on the [DIGIPIN](https://github.com/CEPT-VZG/digipin) project, which was developed by:
+- Department of Posts, Government of India
+- Indian Institute of Technology, Hyderabad
+- National Remote Sensing Centre, ISRO
+
+The original implementation is licensed under Apache License 2.0. This wrapper implementation is licensed under MIT License.
+
 ## Features
 
-- **Core Functions**:
+- **Core Functions** (Original DIGIPIN Implementation):
   - `getDigiPin`: Convert lat/lng to DIGIPIN
   - `getLatLngFromDigiPin`: Convert DIGIPIN to lat/lng
   - Coordinate validation and error handling
   - Support for Indian subcontinent coordinates (2.5°N to 38.5°N, 63.5°E to 99.5°E)
 
-- **CLI Tool**:
-  - Encode coordinates to DIGIPIN
-  - Decode DIGIPIN to coordinates
-  - Support for different coordinate formats (degrees, DMS)
-  - Verbose mode for detailed output
-  - Colored output for better readability
-  - Comprehensive error handling
-
-- **Additional Features**:
-  - Batch encoding/decoding
-  - Express middleware
-  - In-memory LRU cache
-  - Offline grid generator
-  - Reverse geocoding
+- **Wrapper Enhancements**:
+  - **CLI Tool**:
+    - Encode coordinates to DIGIPIN
+    - Decode DIGIPIN to coordinates
+    - Support for different coordinate formats (degrees, DMS)
+    - Verbose mode for detailed output
+    - Colored output for better readability
+    - Comprehensive error handling
+  - **Additional Features**:
+    - Batch encoding/decoding
+    - Express middleware
+    - In-memory LRU cache
+    - Offline grid generator
+    - Reverse geocoding
+    - TypeScript support
+    - Comprehensive documentation
 
 ## Installation
 
@@ -150,4 +163,25 @@ npm run lint
 
 ## License
 
-MIT
+This project is dual-licensed:
+
+1. The wrapper implementation (new code) is licensed under the MIT License
+2. The original DIGIPIN implementation is licensed under the Apache License 2.0
+
+See the [LICENSE](LICENSE) file for the full license texts.
+
+## Legal Notice
+
+This package is a wrapper around the original DIGIPIN implementation. While the wrapper code is under MIT License, the core DIGIPIN algorithm and implementation remains under Apache License 2.0. All original copyright notices and attributions are preserved.
+
+Significant changes made to the original implementation:
+1. Converted to TypeScript
+2. Added CLI interface
+3. Added caching support
+4. Added batch processing
+5. Added Express middleware
+6. Added offline grid generation
+7. Added comprehensive error handling
+8. Added TypeScript type definitions
+9. Added comprehensive documentation
+10. Added test suite

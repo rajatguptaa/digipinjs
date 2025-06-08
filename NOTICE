@@ -1,0 +1,25 @@
+digipinjs
+Copyright (c) 2024 Rajat Gupta
+
+This software includes code from the DIGIPIN project, which is:
+Copyright (c) Department of Posts, Government of India
+Copyright (c) Indian Institute of Technology, Hyderabad
+Copyright (c) National Remote Sensing Centre, ISRO
+
+The original DIGIPIN implementation is licensed under the Apache License 2.0.
+See the LICENSE file for the full Apache License 2.0 text.
+
+This wrapper implementation is licensed under the MIT License.
+See the LICENSE file for the full MIT License text.
+
+Significant changes made to the original implementation:
+1. Converted to TypeScript
+2. Added CLI interface
+3. Added caching support
+4. Added batch processing
+5. Added Express middleware
+6. Added offline grid generation
+7. Added comprehensive error handling
+8. Added TypeScript type definitions
+9. Added comprehensive documentation
+10. Added test suite 
