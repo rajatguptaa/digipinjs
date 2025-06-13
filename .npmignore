@@ -1,0 +1,33 @@
+# Source files
+src/
+examples/
+
+# Test files
+test/
+__tests__/
+*.test.ts
+*.spec.ts
+coverage/
+
+# Development files
+.git/
+.gitignore
+.eslintrc
+.prettierrc
+tsconfig.json
+nyc.config.js
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Build files (will be included via package.json "files")
+!dist/ 
