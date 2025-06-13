@@ -1,7 +1,7 @@
 {
   "name": "digipinjs",
-  "version": "1.0.0",
-  "description": "A TypeScript wrapper for the DIGIPIN geocoding system, adding CLI, caching, and batch processing support. Original DIGIPIN implementation is licensed under Apache License 2.0 by Department of Posts, India.",
+  "version": "1.1.0",
+  "description": "A comprehensive TypeScript library for encoding and decoding Indian geographic coordinates into DIGIPIN format (Indian Postal Digital PIN system). Features CLI tools, caching, batch processing, and Express middleware for seamless integration.",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "bin": {
@@ -11,7 +11,8 @@
     "dist",
     "README.md",
     "LICENSE",
-    "NOTICE"
+    "CHANGELOG.md",
+    "CONTRIBUTING.md"
   ],
   "scripts": {
     "build": "tsc",
@@ -36,10 +37,20 @@
     "location",
     "encoding",
     "decoding",
-    "wrapper"
+    "wrapper",
+    "postal",
+    "postal-code",
+    "indian-postal",
+    "delivery-tracking",
+    "geographic-encoding",
+    "coordinate-converter",
+    "express-middleware",
+    "batch-processing",
+    "caching",
+    "reverse-geocoding"
   ],
   "author": {
-    "name": "Rajat",
+    "name": "Rajat Gupta",
     "url": "https://github.com/rajatguptaa"
   },
   "contributors": [
@@ -79,9 +90,7 @@
     "node": ">=14.0.0"
   },
   "dependencies": {
-    "bottleneck": "^2.19.5",
     "chalk": "^4.1.2",
-    "digipinjs": "^1.0.0",
     "express": "^4.18.2",
     "lru-cache": "^7.18.3",
     "yargs": "^17.6.2"
