@@ -1,6 +1,6 @@
 {
   "name": "digipinjs",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "description": "A comprehensive TypeScript library for encoding and decoding Indian geographic coordinates into DIGIPIN format (Indian Postal Digital PIN system). Features CLI tools, caching, batch processing, and Express middleware for seamless integration.",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -47,8 +47,12 @@
     "express-middleware",
     "batch-processing",
     "caching",
-    "reverse-geocoding"
-  ],
+    "reverse-geocoding",
+    "geospatial",
+    "india",
+    "postal",
+    "address"
+    ],
   "author": {
     "name": "Rajat Gupta",
     "url": "https://github.com/rajatguptaa"
