@@ -10,6 +10,10 @@ export function setCached(lat: number, lng: number, pin: string): void {
   cache.set(`${lat},${lng}`, pin);
 }
 
+export function clearCache(): void {
+  cache.clear();
+}
+
 // src/reverseGeocode.ts
 import { getLatLngFromDigiPin } from './core';
 

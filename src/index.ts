@@ -3,5 +3,5 @@ export { batchEncode, batchDecode } from './batch';
 export { getDigiPin as encode, getLatLngFromDigiPin as decode } from './core';
 export { digiPinMiddleware } from './middleware';
 export { generateGrid } from './offlineGrid';
-export { getCached, setCached } from './cache';
+export { getCached, setCached, clearCache } from './cache';
 export { reverseGeocode } from './cache';

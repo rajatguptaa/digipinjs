@@ -1,11 +1,10 @@
 import { expect } from 'chai';
-import { getCached, setCached } from '../cache';
+import { getCached, setCached, clearCache } from '../cache';
 import { getDigiPin } from '../core';
 
 describe('Cache Functions', () => {
   beforeEach(() => {
-    // Clear cache before each test
-    // Note: In a real implementation, you might want to add a clear() method to the cache
+    clearCache();
   });
 
   it('should cache and retrieve values', () => {
