@@ -1,7 +1,4 @@
-// examples/full-usage.js
-
-const digipinjs = require("digipinjs");
-const path = require("path");
+// examples/full-usage-npm.js
 
 const {  
   getDigiPin,  
@@ -10,10 +7,16 @@ const {
   batchDecode,  
   getCached,  
   setCached,  
-  reverseGeocode,  
+  reverseGeocode  
+} = require("digipinjs");
+
+// Node.js-only features
+const {  
   digiPinMiddleware,  
   generateGrid  
-} = digipinjs;
+} = require("digipinjs/node");
+
+const path = require("path");
 
 // 1. Basic encoding/decoding  
 const lat = 28.6139;  
