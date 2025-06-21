@@ -64,6 +64,43 @@ yarn add digipinjs
 pnpm add digipinjs
 ```
 
+## 🌐 Browser Compatibility
+
+This package is **fully compatible with browser environments** (React, Vue, Angular, etc.) and Node.js environments.
+
+### Browser Usage (React, Vue, Angular, etc.)
+```typescript
+// ✅ Works in browsers - no Node.js dependencies
+import { getDigiPin, getLatLngFromDigiPin, batchEncode } from 'digipinjs';
+
+const pin = getDigiPin(28.6139, 77.2090); // Delhi coordinates
+console.log(pin); // "39J-438-TJC7"
+```
+
+### Node.js Usage (Server-side)
+```typescript
+// ✅ Full Node.js features including CLI, middleware, and file operations
+import { getDigiPin } from 'digipinjs';
+import { generateGrid, digiPinMiddleware } from 'digipinjs/node';
+
+// Core functionality
+const pin = getDigiPin(28.6139, 77.2090);
+
+// Node.js specific features
+generateGrid(20, 70, 30, 80, 0.1, 'grid.json');
+```
+
+### Available Exports by Environment
+
+| Feature | Browser | Node.js | CLI |
+|---------|---------|---------|-----|
+| Core encoding/decoding | ✅ | ✅ | ✅ |
+| Batch processing | ✅ | ✅ | ✅ |
+| Caching | ✅ | ✅ | ✅ |
+| Express middleware | ❌ | ✅ | ❌ |
+| Grid generation | ❌ | ✅ | ❌ |
+| CLI tools | ❌ | ❌ | ✅ |
+
 ## 🛠️ Usage Examples
 
 ### 1. Command Line Interface (CLI)
@@ -86,13 +123,13 @@ digipin-cli encode --lat 28.6139 --lng 77.2090 --verbose --format dms
 
 ### 2. Programmatic Usage
 
+#### Browser Usage (React, Vue, Angular, etc.)
 ```typescript
 import { 
   getDigiPin, 
   getLatLngFromDigiPin,
   batchEncode,
   batchDecode,
-  digiPinMiddleware,
   getCached,
   setCached,
   reverseGeocode 
@@ -115,17 +152,40 @@ const locations = [
 const pins = batchEncode(locations);
 console.log(pins); // ["39J-438-TJC7", "4FK-595-8823", "2L7-3K9-8P2F"]
 
-// Express.js middleware integration
-import express from 'express';
-const app = express();
-app.use(digiPinMiddleware()); // Automatically adds X-DIGIPIN header
-
 // Caching for performance
 const cachedPin = getCached(28.6139, 77.2090);
 if (!cachedPin) {
   const pin = getDigiPin(28.6139, 77.2090);
   setCached(28.6139, 77.2090, pin);
 }
+```
+
+#### Node.js Usage (Server-side)
+```typescript
+import { 
+  getDigiPin, 
+  getLatLngFromDigiPin,
+  batchEncode,
+  batchDecode,
+  getCached,
+  setCached,
+  reverseGeocode 
+} from 'digipinjs';
+
+// Import Node.js specific features
+import { digiPinMiddleware, generateGrid } from 'digipinjs/node';
+
+// Basic encoding/decoding (same as browser)
+const pin = getDigiPin(28.6139, 77.2090);  // Delhi
+console.log(pin); // "39J-438-TJC7"
+
+// Express.js middleware integration
+import express from 'express';
+const app = express();
+app.use(digiPinMiddleware()); // Automatically adds X-DIGIPIN header
+
+// Grid generation for offline use
+generateGrid(20, 70, 30, 80, 0.1, 'grid.json');
 ```
 
 ### 3. Common Use Cases
