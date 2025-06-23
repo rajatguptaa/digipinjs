@@ -14,4 +14,4 @@ Examples of behavior that contributes to a positive environment:
 ## Enforcement
 
 Instances of abusive behavior can be reported to:
-**Rajat Gupta** (maintainer) — `rajatarchanagupta@gmail.com`
+**Rajat Gupta** (maintainer) — `rajatgupta.gupta1@gmail.com`
