@@ -1,0 +1,15 @@
+{
+  "projectName": "digipinjs",
+  "projectOwner": "rajatguptaa",
+  "repoType": "github",
+  "repoHost": "GitHub",
+  "files": [
+    "README.md"
+  ],
+  "imageSize": 100,
+  "commit": true,
+  "commitConvention": "eslint",
+  "contributors": [],
+  "contributorsPerLine": 7,
+  "linkToUsage": true
+}
