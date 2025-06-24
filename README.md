@@ -49,6 +49,7 @@ const pin = getDigiPin(28.6139, 77.2090); // Delhi coordinates
 - 🌐 **Express Middleware**: Easy integration with web applications
 - 📊 **Grid Generation**: Create offline coordinate grids
 - 🔄 **Reverse Geocoding**: Convert DIGIPIN back to coordinates
+- 📐 **Geospatial Utilities**: Distance and nearest-point helpers
 - 📝 **TypeScript Support**: Full type definitions included
 
 ## 📦 Installation
@@ -188,6 +189,34 @@ app.use(digiPinMiddleware()); // Automatically adds X-DIGIPIN header
 generateGrid(20, 70, 30, 80, 0.1, 'grid.json');
 ```
 
+#### Reverse Geocoding
+```typescript
+import { reverseGeocode } from 'digipinjs';
+
+const location = reverseGeocode('39J-438-TJC7');
+console.log(location); // { latitude: 28.6139, longitude: 77.2090 }
+```
+
+#### Geo Utilities
+```typescript
+import {
+  getDistance,
+  getPreciseDistance,
+  orderByDistance,
+  findNearest
+} from 'digipinjs';
+
+const delhi = '39J-438-TJC7';
+const mumbai = '4FK-595-8823';
+
+console.log(getDistance(delhi, mumbai));        // distance in meters
+console.log(getPreciseDistance(delhi, mumbai)); // precise distance
+
+const pins = [mumbai, '2L7-3K9-8P2F']; // Mumbai, Bangalore
+console.log(orderByDistance(delhi, pins)); // sorted by proximity
+console.log(findNearest(delhi, pins));    // nearest pin
+```
+
 ### 3. Common Use Cases
 
 #### E-commerce & Delivery
@@ -274,6 +303,8 @@ npm run lint
 
 # Run the example
 node examples/full-usage-npm.js
+# Geocoding & geo utilities example
+node examples/geocode-example.js
 ```
 
 ## 📊 Performance
