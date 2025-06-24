@@ -55,6 +55,53 @@ const pin = getDigiPin(28.6139, 77.2090); // Delhi coordinates
 - 📐 **Geospatial Utilities**: Distance and nearest-point helpers
 - 📝 **TypeScript Support**: Full type definitions included
 
+## ✅ NEW: Geospatial Utilities with DIGIPIN Support
+
+We’ve integrated [**geolib**](https://www.npmjs.com/package/geolib) so you can now calculate distances and proximity using DIGIPINs directly. These functions internally decode the DIGIPINs to lat/lng and use geolib to perform accurate geo calculations.
+
+### 📏 getDistance(pinA: string, pinB: string, accuracy = 1)
+
+```ts
+import { getDistance } from 'digipinjs';
+
+const delhi = '39J-438-TJC7';
+const mumbai = '4FK-595-8823';
+
+const distance = getDistance(delhi, mumbai);
+console.log(`Distance between Delhi and Mumbai: ${distance}m`);
+```
+
+### 📏 getPreciseDistance(pinA: string, pinB: string, accuracy = 1)
+
+```ts
+import { getPreciseDistance } from 'digipinjs';
+
+const distance = getPreciseDistance('39J-438-TJC7', '4FK-595-8823');
+console.log(`Precise distance (Vincenty): ${distance}m`);
+```
+
+### 📍 orderByDistance(referencePin: string, pins: string\[])
+
+```ts
+import { orderByDistance } from 'digipinjs';
+
+const pins = ['4FK-595-8823', '4PJ-766-C924'];
+const ordered = orderByDistance('39J-438-TJC7', pins);
+
+console.log('Sorted by distance:', ordered);
+```
+
+### 🧭 findNearest(referencePin: string, pins: string\[])
+
+```ts
+import { findNearest } from 'digipinjs';
+
+const pins = ['4FK-595-8823', '4PJ-766-C924', '422-5C2-LTTF'];
+const nearest = findNearest('39J-438-TJC7', pins);
+
+console.log('Nearest location:', nearest);
+
+
 ## 📦 Installation
 
 ```bash
