@@ -100,7 +100,7 @@ const pins = ['4FK-595-8823', '4PJ-766-C924', '422-5C2-LTTF'];
 const nearest = findNearest('39J-438-TJC7', pins);
 
 console.log('Nearest location:', nearest);
-
+```
 
 ## 📦 Installation
 
