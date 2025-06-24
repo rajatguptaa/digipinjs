@@ -366,7 +366,7 @@ This package is based on the original [DIGIPIN](https://github.com/CEPT-VZG/digi
 Thanks to these amazing contributors:
 
 - [@rajatguptaa](https://github.com/rajatguptaa) – Creator & Maintainer  
-- [@amogh-xyz](https://github.com/amogh-chavan) – Contributor (PR [#12](https://github.com/rajatguptaa/digipinjs/pull/12))
+- [@amogh-chavan](https://github.com/amogh-chavan) – Contributor (PR [#12](https://github.com/rajatguptaa/digipinjs/pull/12))
 
 ---
 
