@@ -353,8 +353,6 @@ This package is based on the original [DIGIPIN](https://github.com/CEPT-VZG/digi
 ## 📞 Support
 
 - 🐛 **Issues**: [GitHub Issues](https://github.com/rajatguptaa/digipinjs/issues)
-- 📖 **Documentation**: [Full Documentation](https://digipinjs.com)
-- 💬 **Discussions**: [GitHub Discussions](https://github.com/rajatguptaa/digipinjs/discussions)
 
 ## 🌟 Star History
 
