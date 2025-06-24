@@ -75,6 +75,10 @@
     {
       "name": "National Remote Sensing Centre, ISRO",
       "url": "https://www.nrsc.gov.in/"
+    },
+    {
+      "name": "Amogh Chavan",
+      "url": "https://github.com/amoghchavan"
     }
   ],
   "license": "MIT",
