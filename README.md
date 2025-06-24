@@ -328,6 +328,15 @@ npm run build
 npm test
 ```
 
+## 👥 Contributors
+
+We'd like to thank the following contributors:
+
+- Department of Posts, Government of India
+- Indian Institute of Technology, Hyderabad
+- National Remote Sensing Centre, ISRO
+- [Amogh Chavan](https://github.com/amoghchavan)
+
 ## 📄 License
 
 This project is dual-licensed:
