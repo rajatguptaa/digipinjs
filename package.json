@@ -1,6 +1,6 @@
 {
   "name": "digipinjs",
-  "version": "1.1.7",
+  "version": "1.1.8",
   "description": "A comprehensive TypeScript library for encoding and decoding Indian geographic coordinates into DIGIPIN format (Indian Postal Digital PIN system). Features CLI tools, caching, batch processing, and Express middleware for seamless integration.",
   "main": "dist/index.js",
   "browser": "dist/index.js",
@@ -75,6 +75,10 @@
     {
       "name": "National Remote Sensing Centre, ISRO",
       "url": "https://www.nrsc.gov.in/"
+    },
+    {
+      "name": "Amogh Chavan",
+      "url": "https://github.com/amoghchavan"
     }
   ],
   "license": "MIT",
