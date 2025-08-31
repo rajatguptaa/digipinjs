@@ -171,5 +171,5 @@ yargs(hideBin(process.argv))
   .demandCommand(1, chalk.yellow('Please specify a command: encode or decode'))
   .help()
   .version()
-  .epilog(chalk.gray('For more information, visit: https://github.com/your-org/digipin-wrapper'))
+  .epilog(chalk.gray('For more information, visit: https://github.com/rajatguptaa/digipinjs'))
   .argv;

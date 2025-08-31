@@ -13,10 +13,3 @@ export function setCached(lat: number, lng: number, pin: string): void {
 export function clearCache(): void {
   cache.clear();
 }
-
-// src/reverseGeocode.ts
-import { getLatLngFromDigiPin } from './core';
-
-export function reverseGeocode(pin: string): { latitude: number; longitude: number } {
-  return getLatLngFromDigiPin(pin);
-}

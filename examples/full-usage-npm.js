@@ -51,17 +51,22 @@ const rev = reverseGeocode(pin);
 console.log("Reverse geocoded:", rev);  
 
 // 5. Express middleware (demo)  
-const express = require("express");  
-const app = express();  
-app.use(digiPinMiddleware());  
-app.get("/test", (req, res) => {  
-  res.send("Check X-DIGIPIN header!");  
-});  
-const server = app.listen(0, () => {  
-  const port = (server.address()).port;  
-  console.log(`Express middleware test server running on port ${port}`);  
-  server.close();  
-});  
+// Skipped in restricted environments (no socket binds)
+if (!process.env.NO_NET) {
+  const express = require("express");  
+  const app = express();  
+  app.use(digiPinMiddleware());  
+  app.get("/test", (req, res) => {  
+    res.send("Check X-DIGIPIN header!");  
+  });  
+  const server = app.listen(0, () => {  
+    const port = (server.address()).port;  
+    console.log(`Express middleware test server running on port ${port}`);  
+    server.close();  
+  });  
+} else {
+  console.log("Express middleware demo skipped due to NO_NET=1");
+}
 
 // 6. Offline grid generation (sample)  
 const gridFile = path.join(__dirname, 'grid-sample.json');  
