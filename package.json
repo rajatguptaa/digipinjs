@@ -1,6 +1,6 @@
 {
   "name": "digipinjs",
-  "version": "1.1.9",
+  "version": "1.1.10",
   "description": "A comprehensive TypeScript library for encoding and decoding Indian geographic coordinates into DIGIPIN format (Indian Postal Digital PIN system). Features CLI tools, caching, batch processing, and Express middleware for seamless integration.",
   "main": "dist/index.js",
   "browser": "dist/index.js",
