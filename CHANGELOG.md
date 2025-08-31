@@ -5,6 +5,16 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+### Added
+- Strong DIGIPIN validator with strict length and character checks.
+- Validator test suite.
+
+### Changed
+- Moved `reverseGeocode` to dedicated module `src/reverseGeocode.ts` and updated exports.
+- Updated README/CONTRIBUTING with guidance for running examples in restricted environments using `NO_NET=1`.
+- Fixed CLI epilog link to point to the correct repository.
+
 ## [1.1.8] - 2025-06-24
 ### Added
 - Reverse geocoding example demonstrating geo utilities

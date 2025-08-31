@@ -172,6 +172,15 @@ digipin-cli encode --lat 28.6139 --lng 77.2090 --verbose
 digipin-cli encode --lat 28.6139 --lng 77.2090 --verbose --format dms
 ```
 
+#### Validation and errors
+- The CLI and library validate coordinates and DIGIPINs.
+- Errors include: `Latitude out of range`, `Longitude out of range`, `Invalid DIGIPIN`, `Invalid character`.
+```bash
+# Examples
+digipin-cli encode --lat 100 --lng 77.2090   # -> Latitude out of range
+digipin-cli decode --pin INVALID-PIN         # -> Invalid character
+```
+
 ### 2. Programmatic Usage
 
 #### Browser Usage (React, Vue, Angular, etc.)
@@ -237,6 +246,11 @@ app.use(digiPinMiddleware()); // Automatically adds X-DIGIPIN header
 
 // Grid generation for offline use
 generateGrid(20, 70, 30, 80, 0.1, 'grid.json');
+```
+
+Note: When running in restricted environments (e.g., CI sandboxes where socket binds are blocked), you can skip the Express demo in our example script by setting `NO_NET=1`:
+```bash
+NO_NET=1 node examples/full-usage-npm.js
 ```
 
 #### Reverse Geocoding
@@ -355,6 +369,9 @@ npm run lint
 node examples/full-usage-npm.js
 # Geocoding & geo utilities example
 node examples/geocode-example.js
+
+# If running in restricted environments (no socket binds)
+NO_NET=1 node examples/full-usage-npm.js
 ```
 
 ## 📊 Performance
@@ -427,3 +444,15 @@ Thanks to these amazing contributors:
 **Made with ❤️ for the Indian developer community**
 
 *This package helps developers integrate India's official postal coordinate system into their applications with ease and reliability.*
+## Contributors ✨
+
+Thanks goes to these wonderful people ([emoji key](https://allcontributors.org/docs/en/emoji-key)):
+
+<!-- ALL-CONTRIBUTORS-LIST:START - Do not remove or modify this section -->
+<!-- prettier-ignore-start -->
+<!-- markdownlint-disable -->
+<!-- markdownlint-restore -->
+<!-- prettier-ignore-end -->
+<!-- ALL-CONTRIBUTORS-LIST:END -->
+
+This project follows the [all-contributors](https://github.com/all-contributors/all-contributors) specification. Contributions of any kind welcome!

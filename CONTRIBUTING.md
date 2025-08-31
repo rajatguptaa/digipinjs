@@ -52,6 +52,14 @@ npm test
 
 # Run linter
 npm run lint
+
+# Run examples
+node examples/full-usage-npm.js
+node examples/geocode-example.js
+
+# If you are in a restricted environment (e.g., CI or sandbox) that disallows opening network sockets,
+# skip the Express demo inside the example by setting an env flag:
+NO_NET=1 node examples/full-usage-npm.js
 ```
 
 ## Code Style
