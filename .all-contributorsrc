@@ -9,7 +9,22 @@
   "imageSize": 100,
   "commit": true,
   "commitConvention": "eslint",
-  "contributors": [],
+  "contributors": [
+    {
+      "login": "rajatguptaa",
+      "name": "Rajat Gupta",
+      "avatar_url": "https://github.com/rajatguptaa.png?size=100",
+      "profile": "https://github.com/rajatguptaa",
+      "contributions": ["code", "doc", "maintenance"]
+    },
+    {
+      "login": "amogh-chavan",
+      "name": "Amogh Chavan",
+      "avatar_url": "https://github.com/amogh-chavan.png?size=100",
+      "profile": "https://github.com/amogh-chavan",
+      "contributions": ["code"]
+    }
+  ],
   "contributorsPerLine": 7,
   "linkToUsage": true
 }

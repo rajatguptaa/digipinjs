@@ -1,6 +1,6 @@
 # DigiPIN.js - Indian Postal Code to Coordinates Converter
 <!-- ALL-CONTRIBUTORS-BADGE:START - Do not remove or modify this section -->
-[![All Contributors](https://img.shields.io/badge/all_contributors-0-orange.svg?style=flat-square)](#contributors-)
+[![All Contributors](https://img.shields.io/badge/all_contributors-2-orange.svg?style=flat-square)](#contributors-)
 <!-- ALL-CONTRIBUTORS-BADGE:END -->
 
 [![npm version](https://badge.fury.io/js/digipinjs.svg)](https://badge.fury.io/js/digipinjs)
@@ -451,6 +451,19 @@ Thanks goes to these wonderful people ([emoji key](https://allcontributors.org/d
 <!-- ALL-CONTRIBUTORS-LIST:START - Do not remove or modify this section -->
 <!-- prettier-ignore-start -->
 <!-- markdownlint-disable -->
+<table>
+  <tr>
+    <td align="center"><a href="https://github.com/rajatguptaa"><img src="https://github.com/rajatguptaa.png?size=100" width="100px;" alt="Rajat Gupta"/><br /><sub><b>Rajat Gupta</b></sub></a><br />
+      <a href="#maintenance-rajatguptaa" title="Maintenance">🚧</a>
+      <a href="https://github.com/rajatguptaa/digipinjs/commits?author=rajatguptaa" title="Code">💻</a>
+      <a href="https://github.com/rajatguptaa/digipinjs/commits?author=rajatguptaa" title="Documentation">📖</a>
+    </td>
+    <td align="center"><a href="https://github.com/amogh-chavan"><img src="https://github.com/amogh-chavan.png?size=100" width="100px;" alt="Amogh Chavan"/><br /><sub><b>Amogh Chavan</b></sub></a><br />
+      <a href="https://github.com/rajatguptaa/digipinjs/commits?author=amogh-chavan" title="Code">💻</a>
+    </td>
+  </tr>
+  
+</table>
 <!-- markdownlint-restore -->
 <!-- prettier-ignore-end -->
 <!-- ALL-CONTRIBUTORS-LIST:END -->
