@@ -31,4 +31,6 @@ jobs:
         run: npm test
 
       - name: 🔨 Build Project
-        run: npm run build
+        run: |
+          npm run clean
+          npm run build

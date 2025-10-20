@@ -1,11 +1,38 @@
-export { getDigiPin, getLatLngFromDigiPin } from './core';
+export {
+  getDigiPin,
+  getLatLngFromDigiPin,
+  BOUNDS,
+  type DigiPinFormat,
+  type EncodeOptions,
+  type DecodeOptions,
+} from './core';
 export { batchEncode, batchDecode } from './batch';
-export { getDigiPin as encode, getLatLngFromDigiPin as decode } from './core';
-export { getCached, setCached, clearCache } from './cache';
-export { reverseGeocode } from './reverseGeocode';
+export {
+  getCachedEncode,
+  setCachedEncode,
+  clearCache,
+  clearDecodeCache,
+  clearEncodeCache,
+  getCachedDecode,
+  getCached,
+  setCached,
+} from './cache';
+export { normalizeDigiPin, digiPinValidator } from './util';
+export {
+  reverseGeocode,
+  reverseGeocodeAsync,
+  setReverseGeocodeResolver,
+  clearReverseGeocodeResolver,
+  type ReverseGeocodeOptions,
+  type ReverseGeocodeResolver,
+  type ReverseGeocodeResult,
+} from './reverseGeocode';
 export {
   getDistance,
   getPreciseDistance,
   orderByDistance,
   findNearest,
+  type PinInput,
+  type DistanceOrderOptions,
+  type NearestOptions,
 } from './geo';

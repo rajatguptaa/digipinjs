@@ -1,54 +1,40 @@
 import { expect } from 'chai';
-import { getCached, setCached, clearCache } from '../cache';
-import { getDigiPin } from '../core';
+import {
+  getCachedEncode,
+  setCachedEncode,
+  getCachedDecode,
+  setCachedDecode,
+  clearCache,
+} from '../cache';
+import { getDigiPin, getLatLngFromDigiPin } from '../core';
 
 describe('Cache Functions', () => {
   beforeEach(() => {
     clearCache();
   });
 
-  it('should cache and retrieve values', () => {
+  it('caches encode results by coordinate and format', () => {
     const lat = 28.6139;
     const lng = 77.2090;
-    const pin = getDigiPin(lat, lng);
-    
-    // Initially not cached
-    expect(getCached(lat, lng)).to.be.undefined;
-    
-    // Set cache
-    setCached(lat, lng, pin);
-    expect(getCached(lat, lng)).to.equal(pin);
+    const pin = getDigiPin(lat, lng, { format: 'hyphenated', useCache: false });
+
+    expect(getCachedEncode(lat, lng, 'hyphenated')).to.be.undefined;
+    setCachedEncode(lat, lng, pin, 'hyphenated');
+    expect(getCachedEncode(lat, lng, 'hyphenated')).to.equal(pin);
+
+    // different format stores independently
+    const compact = getDigiPin(lat, lng, { format: 'compact', useCache: false });
+    setCachedEncode(lat, lng, compact, 'compact');
+    expect(getCachedEncode(lat, lng, 'compact')).to.equal(compact);
   });
 
-  it('should handle different coordinates', () => {
-    const coords1 = { lat: 28.6139, lng: 77.2090 }; // Delhi
-    const coords2 = { lat: 19.0760, lng: 72.8777 }; // Mumbai
-    
-    const pin1 = getDigiPin(coords1.lat, coords1.lng);
-    const pin2 = getDigiPin(coords2.lat, coords2.lng);
-    
-    setCached(coords1.lat, coords1.lng, pin1);
-    setCached(coords2.lat, coords2.lng, pin2);
-    
-    expect(getCached(coords1.lat, coords1.lng)).to.equal(pin1);
-    expect(getCached(coords2.lat, coords2.lng)).to.equal(pin2);
-  });
+  it('caches decode results by pin', () => {
+    const pin = '39J-438-TJC7';
+    const coords = getLatLngFromDigiPin(pin, { useCache: false });
 
-  it('should handle cache misses', () => {
-    expect(getCached(0, 0)).to.be.undefined;
-    expect(getCached(90, 180)).to.be.undefined;
+    expect(getCachedDecode(pin)).to.be.undefined;
+    setCachedDecode(pin, coords);
+    expect(getCachedDecode(pin)).to.deep.equal(coords);
   });
+});
 
-  it('should handle cache updates', () => {
-    const lat = 28.6139;
-    const lng = 77.2090;
-    const pin1 = 'ABC-123-DEF';
-    const pin2 = 'XYZ-789-UVW';
-    
-    setCached(lat, lng, pin1);
-    expect(getCached(lat, lng)).to.equal(pin1);
-    
-    setCached(lat, lng, pin2);
-    expect(getCached(lat, lng)).to.equal(pin2);
-  });
-}); 

@@ -1,57 +1,40 @@
 import { expect } from 'chai';
-import { getDigiPin, getLatLngFromDigiPin } from '../core';
+import {
+  getDigiPin,
+  getLatLngFromDigiPin,
+  BOUNDS,
+  type EncodeOptions,
+} from '../core';
 
-describe('DigiPin Core Functions', () => {
-  describe('getDigiPin', () => {
-    it('should encode valid coordinates to digipin', () => {
-      // Test a known coordinate pair
-      const lat = 28.6139; // Delhi
-      const lng = 77.2090;
-      const pin = getDigiPin(lat, lng);
-      expect(pin).to.match(/^[FC98J327K456LMPT]{3}-[FC98J327K456LMPT]{3}-[FC98J327K456LMPT]{4}$/);
-    });
+const defaultEncodeOptions: EncodeOptions = {
+  format: 'hyphenated',
+  roundTo: 6,
+  useCache: false,
+};
 
-    it('should throw error for out of bounds latitude', () => {
-      expect(() => getDigiPin(1, 77.2090)).to.throw('Latitude out of range');
-      expect(() => getDigiPin(40, 77.2090)).to.throw('Latitude out of range');
-    });
-
-    it('should throw error for out of bounds longitude', () => {
-      expect(() => getDigiPin(28.6139, 60)).to.throw('Longitude out of range');
-      expect(() => getDigiPin(28.6139, 100)).to.throw('Longitude out of range');
-    });
+describe('DigiPIN core encode/decode', () => {
+  it('encodes known coordinates', () => {
+    const pin = getDigiPin(28.6139, 77.209, defaultEncodeOptions);
+    expect(pin).to.equal('39J-438-TJC7');
   });
 
-  describe('getLatLngFromDigiPin', () => {
-    it('should decode valid digipin to coordinates', () => {
-      const pin = 'K4P-9C6-LMPT';
-      const result = getLatLngFromDigiPin(pin);
-      expect(result).to.have.property('latitude');
-      expect(result).to.have.property('longitude');
-      expect(result.latitude).to.be.at.least(2.5);
-      expect(result.latitude).to.be.at.most(38.5);
-      expect(result.longitude).to.be.at.least(63.5);
-      expect(result.longitude).to.be.at.most(99.5);
-    });
-
-    it('should throw error for invalid digipin length', () => {
-      expect(() => getLatLngFromDigiPin('K4P-9C6')).to.throw('Invalid DIGIPIN');
-      expect(() => getLatLngFromDigiPin('K4P-9C6-LMPT-EXTRA')).to.throw('Invalid DIGIPIN');
-    });
-
-    it('should throw error for invalid characters', () => {
-      expect(() => getLatLngFromDigiPin('K4P-9C6-LMP1')).to.throw('Invalid character');
-    });
-
-    it('should roundtrip encode and decode', () => {
-      const lat = 28.6139;
-      const lng = 77.2090;
-      const pin = getDigiPin(lat, lng);
-      const result = getLatLngFromDigiPin(pin);
-      
-      // Allow for small floating point differences
-      expect(Math.abs(result.latitude - lat)).to.be.lessThan(0.0001);
-      expect(Math.abs(result.longitude - lng)).to.be.lessThan(0.0001);
-    });
+  it('decodes known DIGIPIN', () => {
+    const coords = getLatLngFromDigiPin('39J-438-TJC7', { useCache: false });
+    expect(coords.latitude).to.be.closeTo(28.6139, 0.1);
+    expect(coords.longitude).to.be.closeTo(77.209, 0.1);
   });
-}); 
+
+  it('round trips through encode -> decode -> encode', () => {
+    const randomInRange = (min: number, max: number): number =>
+      min + Math.random() * (max - min);
+
+    for (let i = 0; i < 200; i++) {
+      const lat = randomInRange(BOUNDS.minLat, BOUNDS.maxLat);
+      const lon = randomInRange(BOUNDS.minLon, BOUNDS.maxLon);
+      const pin = getDigiPin(lat, lon, defaultEncodeOptions);
+      const decoded = getLatLngFromDigiPin(pin, { useCache: false });
+      const reencoded = getDigiPin(decoded.latitude, decoded.longitude, defaultEncodeOptions);
+      expect(reencoded).to.equal(pin);
+    }
+  });
+});

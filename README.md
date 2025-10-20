@@ -20,9 +20,11 @@ npm install digipinjs
 npx digipin-cli encode --lat 28.6139 --lng 77.2090
 # Output: 39J-438-TJC7
 
-# Use in your code
+# Use in your code (ESM shown, CJS via require works too)
 import { getDigiPin } from 'digipinjs';
-const pin = getDigiPin(28.6139, 77.2090); // Delhi coordinates
+
+const pin = getDigiPin(28.6139, 77.2090, { format: 'hyphenated' });
+// pin === '39J-438-TJC7'
 ```
 
 ## 📍 What is DIGIPIN?
@@ -39,25 +41,25 @@ const pin = getDigiPin(28.6139, 77.2090); // Delhi coordinates
 ## 🌟 Features
 
 ### Core DIGIPIN Functions
-- ✅ **Coordinate to DIGIPIN**: Convert lat/lng to 10-character code
-- ✅ **DIGIPIN to Coordinates**: Reverse lookup with high precision
+- ✅ **Coordinate to DIGIPIN**: Convert lat/lng to DIGIPIN with configurable rounding and formatting (hyphenated or compact)
+- ✅ **DIGIPIN to Coordinates**: Reverse lookup with caching and normalized validation helpers
 - ✅ **Indian Subcontinent Support**: Optimized for India (2.5°N-38.5°N, 63.5°E-99.5°E)
-- ✅ **Validation**: Built-in coordinate bounds checking
-- ✅ **Error Handling**: Comprehensive error messages
+- ✅ **Typed Errors**: Purpose-built `BoundsError`, `PinFormatError`, `InvalidCharacterError` for clear handling
 
 ### Enhanced Features
-- 🚀 **CLI Tool**: Command-line interface for quick conversions
-- ⚡ **Batch Processing**: Handle multiple coordinates efficiently
-- 💾 **Caching**: LRU cache for improved performance
-- 🌐 **Express Middleware**: Easy integration with web applications
-- 📊 **Grid Generation**: Create offline coordinate grids
-- 🔄 **Reverse Geocoding**: Convert DIGIPIN back to coordinates
-- 📐 **Geospatial Utilities**: Distance and nearest-point helpers
-- 📝 **TypeScript Support**: Full type definitions included
+- 🚀 **CLI Tooling**: Encode/decode, batch utilities, distance/nearest helpers, JSON output, and stdin watch mode
+- ⚡ **Batch Processing**: Encode/decode arrays with shared options; stream-friendly Node helpers
+- 💾 **Dual Caches**: LRU caches for encode and decode paths for high-throughput scenarios
+- 🧭 **Geospatial Utilities**: Distance, precise distance, ordering, and nearest helpers supporting pre-decoded coordinates
+- 🌐 **Express Middleware**: Drop-in header-based DIGIPIN injection
+- 📊 **Grid Generation**: Stream grids to NDJSON/JSON with validation and formatting controls
+- 🛰️ **Reverse Geocode Hooks**: Plug in custom providers with sync or async fallbacks
+- 🔁 **Node Streams**: Re-useable encode/decode watchers for piping from stdin or other streams
+- 🧱 **Dual Module Builds**: ESM & CommonJS outputs with typed subpath exports for `node`, `watch`, and `errors`
 
 ## ✅ NEW: Geospatial Utilities with DIGIPIN Support
 
-We’ve integrated [**geolib**](https://www.npmjs.com/package/geolib) so you can now calculate distances and proximity using DIGIPINs directly. These functions internally decode the DIGIPINs to lat/lng and use geolib to perform accurate geo calculations.
+We’ve integrated [**geolib**](https://www.npmjs.com/package/geolib) so you can now calculate distances and proximity using DIGIPINs directly. The helpers accept either raw DIGIPIN strings or pre-decoded `{ latitude, longitude }` objects and let you plug in custom distance strategies when needed.
 
 ### 📏 getDistance(pinA: string, pinB: string, accuracy = 1)
 
@@ -86,17 +88,23 @@ console.log(`Precise distance (Vincenty): ${distance}m`);
 import { orderByDistance } from 'digipinjs';
 
 const pins = ['4FK-595-8823', '4PJ-766-C924'];
-const ordered = orderByDistance('39J-438-TJC7', pins);
+const ordered = orderByDistance('39J-438-TJC7', pins, {
+  accuracy: 0.1,
+});
 
 console.log('Sorted by distance:', ordered);
 ```
 
-### 🧭 findNearest(referencePin: string, pins: string\[])
+### 🧭 findNearest(reference: PinInput, pins: PinInput\[])
 
 ```ts
 import { findNearest } from 'digipinjs';
 
-const pins = ['4FK-595-8823', '4PJ-766-C924', '422-5C2-LTTF'];
+const pins = [
+  { latitude: 18.5204, longitude: 73.8567 }, // Pune (pre-decoded)
+  '4FK-595-8823',
+  '422-5C2-LTTF',
+];
 const nearest = findNearest('39J-438-TJC7', pins);
 
 console.log('Nearest location:', nearest);
@@ -130,15 +138,46 @@ console.log(pin); // "39J-438-TJC7"
 
 ### Node.js Usage (Server-side)
 ```typescript
-// ✅ Full Node.js features including CLI, middleware, and file operations
-import { getDigiPin } from 'digipinjs';
-import { generateGrid, digiPinMiddleware } from 'digipinjs/node';
+// ✅ Full Node.js features including CLI, middleware, file operations, and streams
+import express from 'express';
+import { getDigiPin, normalizeDigiPin } from 'digipinjs';
+import {
+  digiPinMiddleware,
+  generateGrid,
+  watchEncodeStream,
+  watchDecodeStream,
+} from 'digipinjs/node';
 
 // Core functionality
-const pin = getDigiPin(28.6139, 77.2090);
+const pin = getDigiPin(28.6139, 77.2090, { format: 'compact' });
 
-// Node.js specific features
-generateGrid(20, 70, 30, 80, 0.1, 'grid.json');
+// Express middleware still works the same
+const app = express();
+app.use(digiPinMiddleware());
+
+// Stream-friendly grid generation
+generateGrid(20, 70, 30, 80, 0.1, 'grid.ndjson', {
+  outputFormat: 'ndjson',
+  format: 'compact',
+});
+
+// Pipe coordinates from stdin, receive DIGIPINs in real time
+watchEncodeStream(process.stdin, {
+  inputFormat: 'json',
+  format: 'hyphenated',
+  onResult: ({ pin: generated }) => console.log('PIN', generated),
+  onError: (error) => console.error('Failed:', error.message),
+});
+
+// Decode stream of DIGIPINs
+watchDecodeStream(process.stdin, {
+  onResult: ({ pin: raw, latitude, longitude }) => {
+    console.log(raw, latitude, longitude);
+  },
+});
+
+// Validation helpers
+const normalized = normalizeDigiPin('k4p-9c6-lmpt');
 ```
 
 ### Available Exports by Environment
@@ -152,34 +191,34 @@ generateGrid(20, 70, 30, 80, 0.1, 'grid.json');
 | Grid generation | ❌ | ✅ | ❌ |
 | CLI tools | ❌ | ❌ | ✅ |
 
+> **CommonJS?** Use `const { getDigiPin } = require('digipinjs');`. Subpath exports such as `digipinjs/node`, `digipinjs/watch`, and `digipinjs/errors` resolve with accurate types in both module systems.
+
 ## 🛠️ Usage Examples
 
 ### 1. Command Line Interface (CLI)
 
 ```bash
-# Basic encoding (Delhi coordinates)
-digipin-cli encode --lat 28.6139 --lng 77.2090
-# Output: 39J-438-TJC7
+# Encode with JSON output and compact DIGIPIN formatting
+digipin-cli encode --lat 28.6139 --lng 77.2090 --json --pin-format compact
 
-# Basic decoding
-digipin-cli decode --pin 39J-438-TJC7
-# Output: Latitude: 28.613901°, Longitude: 77.208998°
+# Decode to coordinates (DMS output)
+digipin-cli decode --pin 39J-438-TJC7 --format dms
 
-# Verbose mode with detailed information
-digipin-cli encode --lat 28.6139 --lng 77.2090 --verbose
+# Batch encode / decode from JSON files
+digipin-cli batch-encode ./data/coords.json --pin-format hyphenated --json
+digipin-cli batch-decode ./data/pins.json --json
 
-# DMS (Degrees, Minutes, Seconds) format
-digipin-cli encode --lat 28.6139 --lng 77.2090 --verbose --format dms
+# Distance helpers
+digipin-cli distance --from 39J-438-TJC7 --to 4FK-595-8823 --json
+digipin-cli nearest --reference 39J-438-TJC7 --pins 4FK-595-8823,4PJ-766-C924 --json
+
+# Watch stdin (CSV lat,lng per line) and stream DIGIPINs
+printf '28.6139,77.2090\n19.0760,72.8777\n' | digipin-cli encode --watch --watch-format csv
 ```
 
 #### Validation and errors
-- The CLI and library validate coordinates and DIGIPINs.
-- Errors include: `Latitude out of range`, `Longitude out of range`, `Invalid DIGIPIN`, `Invalid character`.
-```bash
-# Examples
-digipin-cli encode --lat 100 --lng 77.2090   # -> Latitude out of range
-digipin-cli decode --pin INVALID-PIN         # -> Invalid character
-```
+- The CLI and library emit typed errors: `BoundsError`, `PinFormatError`, `InvalidCharacterError`.
+- Use `--json` to receive machine-readable payloads for automation.
 
 ### 2. Programmatic Usage
 
@@ -190,14 +229,15 @@ import {
   getLatLngFromDigiPin,
   batchEncode,
   batchDecode,
-  getCached,
-  setCached,
+  getCachedEncode,
+  setCachedEncode,
+  normalizeDigiPin,
   reverseGeocode 
 } from 'digipinjs';
 
 // Basic encoding/decoding
-const pin = getDigiPin(28.6139, 77.2090);  // Delhi
-console.log(pin); // "39J-438-TJC7"
+const pin = getDigiPin(28.6139, 77.2090, { format: 'compact' });  // Delhi
+console.log(pin); // "39J438TJC7"
 
 const coords = getLatLngFromDigiPin(pin);
 console.log(coords); // { latitude: 28.6139, longitude: 77.2090 }
@@ -213,39 +253,63 @@ const pins = batchEncode(locations);
 console.log(pins); // ["39J-438-TJC7", "4FK-595-8823", "2L7-3K9-8P2F"]
 
 // Caching for performance
-const cachedPin = getCached(28.6139, 77.2090);
+const cachedPin = getCachedEncode(28.6139, 77.2090, 'hyphenated');
 if (!cachedPin) {
   const pin = getDigiPin(28.6139, 77.2090);
-  setCached(28.6139, 77.2090, pin);
+  setCachedEncode(28.6139, 77.2090, pin, 'hyphenated');
 }
+
+// Normalization helper
+const normalized = normalizeDigiPin('k4p-9c6-lmpt');
+console.log(normalized); // "K4P9C6LMPT"
 ```
 
 #### Node.js Usage (Server-side)
 ```typescript
-import { 
-  getDigiPin, 
-  getLatLngFromDigiPin,
-  batchEncode,
-  batchDecode,
-  getCached,
-  setCached,
-  reverseGeocode 
-} from 'digipinjs';
-
-// Import Node.js specific features
-import { digiPinMiddleware, generateGrid } from 'digipinjs/node';
-
-// Basic encoding/decoding (same as browser)
-const pin = getDigiPin(28.6139, 77.2090);  // Delhi
-console.log(pin); // "39J-438-TJC7"
-
-// Express.js middleware integration
 import express from 'express';
-const app = express();
-app.use(digiPinMiddleware()); // Automatically adds X-DIGIPIN header
+import { getDigiPin, reverseGeocodeAsync } from 'digipinjs';
+import {
+  digiPinMiddleware,
+  generateGrid,
+  watchEncodeStream,
+  watchDecodeStream,
+  setReverseGeocodeResolver,
+} from 'digipinjs/node';
 
-// Grid generation for offline use
-generateGrid(20, 70, 30, 80, 0.1, 'grid.json');
+// Plug in your own data source for human-readable reverse geocoding
+const myDatabase = {
+  lookup: async (pin: string) => undefined,
+};
+
+const app = express();
+app.use(digiPinMiddleware());
+
+// Optional: hook up your own reverse geocode provider (sync or async)
+setReverseGeocodeResolver(async (pin) => {
+  const match = await myDatabase.lookup(pin);
+  if (!match) return undefined; // default fallback to coordinate decode
+  return { pin, ...match };
+});
+
+// Generate NDJSON grids safely without loading everything into memory
+generateGrid(20, 70, 30, 80, 0.25, 'grid.ndjson', {
+  outputFormat: 'ndjson',
+  format: 'hyphenated',
+});
+
+// Stream encode coordinates from stdin (JSON objects)
+watchEncodeStream(process.stdin, {
+  inputFormat: 'json',
+  format: 'compact',
+  onResult: ({ pin }) => process.stdout.write(`${pin}\n`),
+  onError: (error, raw) => console.error('encode failed', raw, error.message),
+});
+
+// Stream decode DIGIPINs from stdin
+watchDecodeStream(process.stdin, {
+  onResult: ({ pin, latitude, longitude }) =>
+    console.log(pin, latitude, longitude),
+});
 ```
 
 Note: When running in restricted environments (e.g., CI sandboxes where socket binds are blocked), you can skip the Express demo in our example script by setting `NO_NET=1`:
@@ -255,10 +319,19 @@ NO_NET=1 node examples/full-usage-npm.js
 
 #### Reverse Geocoding
 ```typescript
-import { reverseGeocode } from 'digipinjs';
+import { reverseGeocode, reverseGeocodeAsync } from 'digipinjs';
 
-const location = reverseGeocode('39J-438-TJC7');
-console.log(location); // { latitude: 28.6139, longitude: 77.2090 }
+// Sync helper (falls back to coordinate decode if no resolver matches)
+const fallback = reverseGeocode('39J-438-TJC7');
+console.log(fallback); // { pin: '39J-438-TJC7', latitude: ..., longitude: ... }
+
+async function demo() {
+  // Async helper supports custom providers configured via setReverseGeocodeResolver
+  const resolved = await reverseGeocodeAsync('39J-438-TJC7');
+  console.log(resolved);
+}
+
+demo();
 ```
 
 #### Geo Utilities
@@ -273,12 +346,15 @@ import {
 const delhi = '39J-438-TJC7';
 const mumbai = '4FK-595-8823';
 
-console.log(getDistance(delhi, mumbai));        // distance in meters
-console.log(getPreciseDistance(delhi, mumbai)); // precise distance
+console.log(getDistance(delhi, mumbai, 1));        // distance in meters
+console.log(getPreciseDistance(delhi, mumbai, 1)); // precise distance
 
-const pins = [mumbai, '2L7-3K9-8P2F']; // Mumbai, Bangalore
+const pins = [
+  mumbai,
+  { latitude: 12.9716, longitude: 77.5946 }, // Bangalore (pre-decoded)
+];
 console.log(orderByDistance(delhi, pins)); // sorted by proximity
-console.log(findNearest(delhi, pins));    // nearest pin
+console.log(findNearest(delhi, pins));    // nearest pin (returns original input shape)
 ```
 
 ### 3. Common Use Cases

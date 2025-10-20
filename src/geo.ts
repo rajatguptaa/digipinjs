@@ -1,54 +1,122 @@
-import { getLatLngFromDigiPin } from './core';
+import {
+  getLatLngFromDigiPin,
+  type DecodeOptions,
+} from './core';
 import {
   getDistance as getCoordinateDistance,
   getPreciseDistance as getPreciseCoordinateDistance,
 } from 'geolib';
-import { digiPinValidator } from './util';
+import type { Coordinates } from './cache';
+import { normalizeDigiPin } from './util';
+
+export type PinInput = string | Coordinates;
+
+function isCoordinates(value: unknown): value is Coordinates {
+  if (!value || typeof value !== 'object') {
+    return false;
+  }
+  const maybe = value as Partial<Coordinates>;
+  return (
+    typeof maybe.latitude === 'number' &&
+    typeof maybe.longitude === 'number'
+  );
+}
+
+function resolveCoordinates(
+  input: PinInput,
+  decodeOptions: DecodeOptions = {}
+): Coordinates {
+  if (typeof input === 'string') {
+    return getLatLngFromDigiPin(input, decodeOptions);
+  }
+  if (isCoordinates(input)) {
+    return input;
+  }
+  throw new TypeError('Unsupported pin input');
+}
 
 export function getDistance(
-  startPin: string,
-  endPin: string,
-  accuracy = 1
+  start: PinInput,
+  end: PinInput,
+  accuracy = 1,
+  decodeOptions: DecodeOptions = {}
 ): number {
-  digiPinValidator(startPin);
-  digiPinValidator(endPin);
+  if (typeof start === 'string') {
+    normalizeDigiPin(start);
+  }
+  if (typeof end === 'string') {
+    normalizeDigiPin(end);
+  }
 
-  const start = getLatLngFromDigiPin(startPin);
-  const end = getLatLngFromDigiPin(endPin);
+  const startCoords = resolveCoordinates(start, decodeOptions);
+  const endCoords = resolveCoordinates(end, decodeOptions);
 
-  return getCoordinateDistance(start, end, accuracy);
+  return getCoordinateDistance(startCoords, endCoords, accuracy);
 }
 
 export function getPreciseDistance(
-  startPin: string,
-  endPin: string,
-  accuracy = 1
+  start: PinInput,
+  end: PinInput,
+  accuracy = 1,
+  decodeOptions: DecodeOptions = {}
 ): number {
-  digiPinValidator(startPin);
-  digiPinValidator(endPin);
+  if (typeof start === 'string') {
+    normalizeDigiPin(start);
+  }
+  if (typeof end === 'string') {
+    normalizeDigiPin(end);
+  }
 
-  const start = getLatLngFromDigiPin(startPin);
-  const end = getLatLngFromDigiPin(endPin);
+  const startCoords = resolveCoordinates(start, decodeOptions);
+  const endCoords = resolveCoordinates(end, decodeOptions);
 
-  return getPreciseCoordinateDistance(start, end, accuracy);
+  return getPreciseCoordinateDistance(startCoords, endCoords, accuracy);
 }
 
-export function orderByDistance(
-  referencePin: string,
-  pins: string[],
-  distanceFn: (startPin: string, endPin: string) => number = getDistance
-) {
-  digiPinValidator(referencePin);
-  pins.forEach((p) => digiPinValidator(p));
+export interface DistanceOrderOptions {
+  accuracy?: number;
+  decodeOptions?: DecodeOptions;
+  distanceFn?: (start: Coordinates, end: Coordinates) => number;
+}
+
+export function orderByDistance<T extends PinInput>(
+  reference: PinInput,
+  pins: readonly T[],
+  options: DistanceOrderOptions = {}
+): T[] {
+  const {
+    accuracy = 1,
+    decodeOptions = {},
+    distanceFn = (start: Coordinates, end: Coordinates) =>
+      getCoordinateDistance(start, end, accuracy),
+  } = options;
+
+  if (typeof reference === 'string') {
+    normalizeDigiPin(reference);
+  }
+
+  const referenceCoords = resolveCoordinates(reference, decodeOptions);
 
   return pins
-    .slice()
-    .sort((a, b) => distanceFn(referencePin, a) - distanceFn(referencePin, b));
+    .map((pin) => ({
+      pin,
+      coords: resolveCoordinates(pin, decodeOptions),
+    }))
+    .sort((a, b) => distanceFn(referenceCoords, a.coords) - distanceFn(referenceCoords, b.coords))
+    .map(({ pin }) => pin);
 }
 
-export function findNearest(referencePin: string, pins: string[]) {
-  digiPinValidator(referencePin);
-  pins.forEach((p) => digiPinValidator(p));
+export interface NearestOptions extends DistanceOrderOptions {}
 
-  return orderByDistance(referencePin, pins)[0];
+export function findNearest<T extends PinInput>(
+  reference: PinInput,
+  pins: readonly T[],
+  options: NearestOptions = {}
+): T | undefined {
+  if (pins.length === 0) {
+    return undefined;
+  }
+
+  return orderByDistance(reference, pins, options)[0];
 }
+
