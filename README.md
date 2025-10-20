@@ -146,6 +146,8 @@ import {
   generateGrid,
   watchEncodeStream,
   watchDecodeStream,
+  setReverseGeocodeResolver,
+  reverseGeocodeAsync,
 } from 'digipinjs/node';
 
 // Core functionality
@@ -154,6 +156,14 @@ const pin = getDigiPin(28.6139, 77.2090, { format: 'compact' });
 // Express middleware still works the same
 const app = express();
 app.use(digiPinMiddleware());
+
+// Optional reverse geocode resolver for richer metadata
+setReverseGeocodeResolver(async (pin) => {
+  if (pin === normalized) {
+    return { pin, latitude: 28.6139, longitude: 77.2090, label: 'New Delhi' };
+  }
+  return undefined;
+});
 
 // Stream-friendly grid generation
 generateGrid(20, 70, 30, 80, 0.1, 'grid.ndjson', {
@@ -178,6 +188,12 @@ watchDecodeStream(process.stdin, {
 
 // Validation helpers
 const normalized = normalizeDigiPin('k4p-9c6-lmpt');
+
+// Access the resolver output when needed
+(async () => {
+  const resolved = await reverseGeocodeAsync('39J-438-TJC7');
+  console.log(resolved);
+})();
 ```
 
 ### Available Exports by Environment
@@ -267,13 +283,12 @@ console.log(normalized); // "K4P9C6LMPT"
 #### Node.js Usage (Server-side)
 ```typescript
 import express from 'express';
-import { getDigiPin, reverseGeocodeAsync } from 'digipinjs';
+import { getDigiPin, setReverseGeocodeResolver, reverseGeocodeAsync } from 'digipinjs';
 import {
   digiPinMiddleware,
   generateGrid,
   watchEncodeStream,
   watchDecodeStream,
-  setReverseGeocodeResolver,
 } from 'digipinjs/node';
 
 // Plug in your own data source for human-readable reverse geocoding
@@ -310,6 +325,12 @@ watchDecodeStream(process.stdin, {
   onResult: ({ pin, latitude, longitude }) =>
     console.log(pin, latitude, longitude),
 });
+
+// Inspect resolver output when needed
+(async () => {
+  const resolved = await reverseGeocodeAsync('39J-438-TJC7');
+  console.log(resolved);
+})();
 ```
 
 Note: When running in restricted environments (e.g., CI sandboxes where socket binds are blocked), you can skip the Express demo in our example script by setting `NO_NET=1`:
