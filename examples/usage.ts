@@ -1,14 +1,14 @@
 const express = require('express');
-const { 
-  getDigiPin, 
+const {
+  getDigiPin,
   getLatLngFromDigiPin,
   batchEncode,
   batchDecode,
-  digiPinMiddleware,
-  getCached,
-  setCached,
-  reverseGeocode
-} = require('../dist');
+  getCachedEncode,
+  setCachedEncode,
+  reverseGeocode,
+} = require('../dist/cjs');
+const { digiPinMiddleware } = require('../dist/cjs/node');
 
 // 1. Basic Usage
 console.log('\n1. Basic Usage:');
@@ -33,20 +33,13 @@ console.log('Batch Decode:', decodedCoords);
 
 // 3. Caching Example
 console.log('\n3. Caching:');
-// First call - not cached
-console.log('First call (not cached):');
-const start1 = Date.now();
-const pin1 = getDigiPin(lat, lng);
-const time1 = Date.now() - start1;
-console.log(`Time taken: ${time1}ms`);
-
-// Second call - should be cached
-console.log('Second call (cached):');
-const start2 = Date.now();
-const pin2 = getDigiPin(lat, lng);
-const time2 = Date.now() - start2;
-console.log(`Time taken: ${time2}ms`);
-console.log(`Cache hit: ${time2 < time1}`);
+const cachedBefore = getCachedEncode(lat, lng, 'hyphenated');
+console.log('Initial cache lookup:', cachedBefore);
+if (!cachedBefore) {
+  setCachedEncode(lat, lng, pin, 'hyphenated');
+}
+const cachedAfter = getCachedEncode(lat, lng, 'hyphenated');
+console.log('Cached value:', cachedAfter);
 
 // 4. Reverse Geocoding
 console.log('\n4. Reverse Geocoding:');
@@ -91,10 +84,23 @@ app.get('/generate', (req, res) => {
 });
 
 // Start the server
-const port = 3000;
-app.listen(port, () => {
-  console.log(`Example server running at http://localhost:${port}`);
-  console.log('\nTry these endpoints:');
-  console.log(`1. Generate DigiPIN: http://localhost:${port}/generate?lat=28.6139&lng=77.2090`);
-  console.log(`2. Get location: http://localhost:${port}/location (with X-DIGIPIN header)`);
-}); 
+const port = Number(process.env.PORT || 3000);
+
+if (process.env.NO_NET) {
+  console.log('\nExpress example skipped due to NO_NET=1');
+} else {
+  try {
+    const server = app.listen(port);
+    server.on('listening', () => {
+      console.log(`Example server running at http://localhost:${port}`);
+      console.log('\nTry these endpoints:');
+      console.log(`1. Generate DigiPIN: http://localhost:${port}/generate?lat=28.6139&lng=77.2090`);
+      console.log('2. Get location: http://localhost:${port}/location (with X-DIGIPIN header)');
+    });
+    server.on('error', (error) => {
+      console.error('Express example skipped:', error.message);
+    });
+  } catch (error) {
+    console.error('Express example skipped:', error.message);
+  }
+}

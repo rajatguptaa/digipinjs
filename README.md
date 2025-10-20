@@ -235,6 +235,7 @@ printf '28.6139,77.2090\n19.0760,72.8777\n' | digipin-cli encode --watch --watch
 #### Validation and errors
 - The CLI and library emit typed errors: `BoundsError`, `PinFormatError`, `InvalidCharacterError`.
 - Use `--json` to receive machine-readable payloads for automation.
+- Error classes are exported from the `digipinjs/errors` subpath for programmatic checks.
 
 ### 2. Programmatic Usage
 
@@ -250,6 +251,7 @@ import {
   normalizeDigiPin,
   reverseGeocode 
 } from 'digipinjs';
+import { BoundsError } from 'digipinjs/errors';
 
 // Basic encoding/decoding
 const pin = getDigiPin(28.6139, 77.2090, { format: 'compact' });  // Delhi
@@ -278,6 +280,14 @@ if (!cachedPin) {
 // Normalization helper
 const normalized = normalizeDigiPin('k4p-9c6-lmpt');
 console.log(normalized); // "K4P9C6LMPT"
+
+try {
+  getDigiPin(100, 200);
+} catch (error) {
+  if (error instanceof BoundsError) {
+    console.error('Out of bounds');
+  }
+}
 ```
 
 #### Node.js Usage (Server-side)
