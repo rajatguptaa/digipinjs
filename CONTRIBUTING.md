@@ -49,9 +49,16 @@ npm run build
 
 # Run tests
 npm test
+npm run test:cli # CLI end-to-end tests
 
 # Run linter
 npm run lint
+
+# Run benchmark (optional)
+npm run bench
+
+# Reset build artifacts
+npm run clean
 
 # Run examples
 node examples/full-usage-npm.js

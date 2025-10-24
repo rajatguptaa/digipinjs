@@ -1,63 +1,167 @@
-const DIGIPIN_GRID = [
-    ['F','C','9','8'],
-    ['J','3','2','7'],
-    ['K','4','5','6'],
-    ['L','M','P','T']
-  ];
-  const BOUNDS = { minLat: 2.5, maxLat: 38.5, minLon: 63.5, maxLon: 99.5 };
-  
-  /**
-   * Encode latitude & longitude into DIGIPIN
-   */
-  export function getDigiPin(lat: number, lon: number): string {
-    if (lat < BOUNDS.minLat || lat > BOUNDS.maxLat)
-      throw new Error('Latitude out of range');
-    if (lon < BOUNDS.minLon || lon > BOUNDS.maxLon)
-      throw new Error('Longitude out of range');
-  
-    let [minLat, maxLat, minLon, maxLon] = [BOUNDS.minLat, BOUNDS.maxLat, BOUNDS.minLon, BOUNDS.maxLon];
-    let code = '';
-    for (let level = 1; level <= 10; level++) {
-      const latStep = (maxLat - minLat) / 4;
-      const lonStep = (maxLon - minLon) / 4;
-      let row = 3 - Math.floor((lat - minLat) / latStep);
-      let col = Math.floor((lon - minLon) / lonStep);
-      row = Math.min(3, Math.max(0, row));
-      col = Math.min(3, Math.max(0, col));
-      code += DIGIPIN_GRID[row][col];
-      if (level === 3 || level === 6) code += '-';
-      maxLat = minLat + latStep * (4 - row);
-      minLat = minLat + latStep * (3 - row);
-      minLon = minLon + lonStep * col;
-      maxLon = minLon + lonStep;
-    }
-    return code;
+import { getCachedDecode, getCachedEncode, setCachedDecode, setCachedEncode } from './cache';
+import { BoundsError, InvalidCharacterError, PinFormatError } from './errors';
+import { normalizeDigiPin } from './util';
+
+type Coordinate = { latitude: number; longitude: number };
+
+interface Bounds {
+  minLat: number;
+  maxLat: number;
+  minLon: number;
+  maxLon: number;
+}
+
+const DIGIPIN_GRID: readonly (readonly string[])[] = [
+  ['F', 'C', '9', '8'],
+  ['J', '3', '2', '7'],
+  ['K', '4', '5', '6'],
+  ['L', 'M', 'P', 'T'],
+] as const;
+
+const BOUNDS: Bounds = { minLat: 2.5, maxLat: 38.5, minLon: 63.5, maxLon: 99.5 };
+
+const CHAR_TO_COORD = new Map<string, { row: number; col: number }>();
+
+for (let row = 0; row < DIGIPIN_GRID.length; row++) {
+  for (let col = 0; col < DIGIPIN_GRID[row].length; col++) {
+    CHAR_TO_COORD.set(DIGIPIN_GRID[row][col], { row, col });
   }
-  
-  /**
-   * Decode DIGIPIN back to lat/lon center
-   */
-  export function getLatLngFromDigiPin(pin: string): { latitude: number; longitude: number } {
-    const clean = pin.replace(/-/g, '');
-    if (clean.length !== 10) throw new Error('Invalid DIGIPIN');
-    let [minLat, maxLat, minLon, maxLon] = [BOUNDS.minLat, BOUNDS.maxLat, BOUNDS.minLon, BOUNDS.maxLon];
-    for (const char of clean) {
-      let found = false;
-      let ri = 0, ci = 0;
-      for (let r = 0; r < 4; r++) {
-        for (let c = 0; c < 4; c++) {
-          if (DIGIPIN_GRID[r][c] === char) { ri = r; ci = c; found = true; break; }
-        }
-        if (found) break;
-      }
-      if (!found) throw new Error('Invalid character');
-      const latStep = (maxLat - minLat) / 4;
-      const lonStep = (maxLon - minLon) / 4;
-      const newMaxLat = minLat + latStep * (4 - ri);
-      const newMinLat = minLat + latStep * (3 - ri);
-      const newMinLon = minLon + lonStep * ci;
-      const newMaxLon = newMinLon + lonStep;
-      [minLat, maxLat, minLon, maxLon] = [newMinLat, newMaxLat, newMinLon, newMaxLon];
-    }
-    return { latitude: (minLat + maxLat) / 2, longitude: (minLon + maxLon) / 2 };
+}
+
+export type DigiPinFormat = 'hyphenated' | 'compact';
+
+export interface EncodeOptions {
+  format?: DigiPinFormat;
+  roundTo?: number | 'none';
+  useCache?: boolean;
+}
+
+export interface DecodeOptions {
+  useCache?: boolean;
+}
+
+function ensureBounds(lat: number, lon: number): void {
+  if (lat < BOUNDS.minLat || lat > BOUNDS.maxLat || lon < BOUNDS.minLon || lon > BOUNDS.maxLon) {
+    throw new BoundsError(lat, lon, BOUNDS);
   }
+}
+
+function formatPin(pin: string, format: DigiPinFormat): string {
+  if (format === 'compact') {
+    return pin.replace(/-/g, '');
+  }
+  const compact = pin.replace(/-/g, '');
+  return `${compact.slice(0, 3)}-${compact.slice(3, 6)}-${compact.slice(6)}`;
+}
+
+function roundCoordinate(value: number, roundTo: number | 'none'): number {
+  if (roundTo === 'none') {
+    return value;
+  }
+  const decimals = typeof roundTo === 'number' ? roundTo : 6;
+  const factor = 10 ** decimals;
+  return Math.round(value * factor) / factor;
+}
+
+/**
+ * Encode latitude & longitude into DIGIPIN.
+ */
+export function getDigiPin(lat: number, lon: number, options: EncodeOptions = {}): string {
+  const { format = 'hyphenated', roundTo = 6, useCache = true } = options;
+
+  ensureBounds(lat, lon);
+
+  const roundedLat = roundCoordinate(lat, roundTo);
+  const roundedLon = roundCoordinate(lon, roundTo);
+
+  if (useCache) {
+    const cached = getCachedEncode(roundedLat, roundedLon, format);
+    if (cached) {
+      return cached;
+    }
+  }
+
+  let minLat = BOUNDS.minLat;
+  let maxLat = BOUNDS.maxLat;
+  let minLon = BOUNDS.minLon;
+  let maxLon = BOUNDS.maxLon;
+
+  let code = '';
+
+  for (let level = 1; level <= 10; level++) {
+    const latStep = (maxLat - minLat) / 4;
+    const lonStep = (maxLon - minLon) / 4;
+    let row = 3 - Math.floor((roundedLat - minLat) / latStep);
+    let col = Math.floor((roundedLon - minLon) / lonStep);
+
+    row = Math.min(3, Math.max(0, row));
+    col = Math.min(3, Math.max(0, col));
+    code += DIGIPIN_GRID[row][col];
+
+    maxLat = minLat + latStep * (4 - row);
+    minLat = minLat + latStep * (3 - row);
+    minLon = minLon + lonStep * col;
+    maxLon = minLon + lonStep;
+  }
+
+  const formatted = formatPin(code, format);
+
+  if (useCache) {
+    setCachedEncode(roundedLat, roundedLon, formatted, format);
+  }
+
+  return formatted;
+}
+
+/**
+ * Decode DIGIPIN back to lat/lon center.
+ */
+export function getLatLngFromDigiPin(pin: string, options: DecodeOptions = {}): Coordinate {
+  const { useCache = true } = options;
+  const normalized = normalizeDigiPin(pin);
+
+  if (useCache) {
+    const cached = getCachedDecode(normalized);
+    if (cached) {
+      return cached;
+    }
+  }
+
+  let minLat = BOUNDS.minLat;
+  let maxLat = BOUNDS.maxLat;
+  let minLon = BOUNDS.minLon;
+  let maxLon = BOUNDS.maxLon;
+
+  for (const char of normalized) {
+    const coord = CHAR_TO_COORD.get(char);
+    if (!coord) {
+      throw new InvalidCharacterError(char);
+    }
+
+    const latStep = (maxLat - minLat) / 4;
+    const lonStep = (maxLon - minLon) / 4;
+
+    const newMaxLat = minLat + latStep * (4 - coord.row);
+    const newMinLat = minLat + latStep * (3 - coord.row);
+    const newMinLon = minLon + lonStep * coord.col;
+    const newMaxLon = newMinLon + lonStep;
+
+    minLat = newMinLat;
+    maxLat = newMaxLat;
+    minLon = newMinLon;
+    maxLon = newMaxLon;
+  }
+
+  const result: Coordinate = {
+    latitude: (minLat + maxLat) / 2,
+    longitude: (minLon + maxLon) / 2,
+  };
+
+  if (useCache) {
+    setCachedDecode(normalized, result);
+  }
+
+  return result;
+}
+
+export { BOUNDS };
