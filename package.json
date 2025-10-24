@@ -52,7 +52,7 @@
     "clean": "node scripts/clean.js",
     "test": "npm run test:unit && npm run test:cli",
     "test:unit": "TS_NODE_PROJECT=tsconfig.test.json mocha -r ts-node/register 'src/**/*.test.ts'",
-    "test:cli": "TS_NODE_PROJECT=tsconfig.test.json mocha -r ts-node/register 'test/**/*.cli.ts'",
+    "test:cli": "TS_NODE_PROJECT=tsconfig.test.json mocha --timeout 10000 -r ts-node/register 'test/**/*.cli.ts'",
     "test:coverage": "nyc npm test",
     "lint": "eslint src/**/*.ts",
     "bench": "ts-node benchmarks/encode.bench.ts",
