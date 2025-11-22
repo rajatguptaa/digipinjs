@@ -36,3 +36,4 @@ export {
   type DistanceOrderOptions,
   type NearestOptions,
 } from './geo';
+export { toGeoJson, type GeoJsonFeature, type GeoJsonPoint } from './geojson';

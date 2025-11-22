@@ -12,6 +12,7 @@ import {
   type DecodeOptions,
   BOUNDS,
 } from './core';
+import { toGeoJson } from './geojson';
 import { batchDecode, batchEncode } from './batch';
 import {
   getDistance as getDistanceBetween,
@@ -57,7 +58,7 @@ interface EncodeArgs extends ArgumentsCamelCase, JsonOutputArgs, CacheArgs {
 interface DecodeArgs extends ArgumentsCamelCase, JsonOutputArgs, CacheArgs {
   pin?: string;
   verbose?: boolean;
-  format?: OutputFormat;
+  format?: OutputFormat | 'geojson';
   watch?: boolean;
 }
 
@@ -98,7 +99,7 @@ function toDMS(decimal: number, isLatitude: boolean): string {
 
 function formatCoords(coords: Coordinate, format: OutputFormat = 'degrees'): string {
   if (format === 'dms') {
-    return `Latitude: ${toDMS(coords.latitude, true)}\nLongitude: ${toDMS(coords.longitude, false)}`;
+    return `Lat: ${toDMS(coords.latitude, true)}, Lng: ${toDMS(coords.longitude, false)}`;
   }
   return `Latitude: ${chalk.cyan(coords.latitude.toFixed(6))}°\nLongitude: ${chalk.cyan(coords.longitude.toFixed(6))}°`;
 }
@@ -121,10 +122,7 @@ function handleError(error: unknown): never {
   } else if (error instanceof PinFormatError) {
     console.error(chalk.red('\nError:'), 'DIGIPIN must be 10 characters long (excluding hyphens)');
   } else if (error instanceof InvalidCharacterError) {
-    console.error(
-      chalk.red('\nError:'),
-      `DIGIPIN contains unsupported character "${chalk.cyan(error.character)}"`
-    );
+    console.error(chalk.red('Error:'), error.message);
   } else if (error instanceof DigiPinError) {
     console.error(chalk.red('\nError:'), error.message);
   } else if (error instanceof Error) {
@@ -305,10 +303,11 @@ const decodeCommand: CommandModule<{}, DecodeArgs> = {
         describe: 'Emit JSON output',
       })
       .option('format', {
+        alias: 'f',
         type: 'string',
-        choices: ['degrees', 'dms'],
+        choices: ['degrees', 'dms', 'geojson'],
         default: 'degrees',
-        describe: 'Coordinate format for output',
+        describe: 'Output format (degrees, dms, or geojson)',
       })
       .option('cache', {
         type: 'boolean',
@@ -333,11 +332,19 @@ const decodeCommand: CommandModule<{}, DecodeArgs> = {
           useCache: argv.cache ?? true,
           onResult: ({ pin, latitude, longitude }) => {
             if (argv.json) {
-              printJson({ pin, latitude, longitude });
+              if (argv.format === 'geojson') {
+                printJson(toGeoJson(pin, {}, { useCache: argv.cache ?? true }));
+              } else {
+                printJson({ pin, latitude, longitude });
+              }
             } else {
-              console.log(
-                formatCoords({ latitude, longitude }, (argv.format ?? 'degrees') as OutputFormat)
-              );
+              if (argv.format === 'geojson') {
+                printJson(toGeoJson(pin, {}, { useCache: argv.cache ?? true }), true);
+              } else {
+                console.log(
+                  formatCoords({ latitude, longitude }, (argv.format ?? 'degrees') as OutputFormat)
+                );
+              }
             }
           },
           onError: (error, raw) => {
@@ -355,22 +362,18 @@ const decodeCommand: CommandModule<{}, DecodeArgs> = {
       } as DecodeOptions);
 
       if (argv.json) {
-        printJson({ pin, ...coords });
-        return;
-      }
-
-      if (argv.verbose) {
-        console.log(chalk.green('\nInput DIGIPIN:'), chalk.cyan(pin));
-        console.log(chalk.green('DIGIPIN Format:'), 'XXX-XXX-XXXX');
-        console.log(chalk.green('Valid Characters:'), 'F,C,9,8,J,3,2,7,K,4,5,6,L,M,P,T');
-        console.log(chalk.green('\nDecoded Coordinates:'));
-        console.log(formatCoords(coords, argv.format));
-        console.log(chalk.green('\nCoordinate Bounds:'));
-        console.log(chalk.yellow('Latitude:'), `${BOUNDS.minLat}° to ${BOUNDS.maxLat}°`);
-        console.log(chalk.yellow('Longitude:'), `${BOUNDS.minLon}° to ${BOUNDS.maxLon}°`);
+        if (argv.format === 'geojson') {
+          printJson(toGeoJson(pin, {}, { useCache: argv.cache ?? true }), argv.verbose);
+        } else {
+          printJson({ pin, ...coords }, argv.verbose);
+        }
       } else {
-        console.log(chalk.green('\nCoordinates:'));
-        console.log(formatCoords(coords, argv.format));
+        if (argv.format === 'geojson') {
+          printJson(toGeoJson(pin, {}, { useCache: argv.cache ?? true }), true);
+        } else {
+          console.log(chalk.green('\nCoordinates:'));
+          console.log(formatCoords(coords, argv.format as OutputFormat));
+        }
       }
     } catch (error) {
       handleError(error);

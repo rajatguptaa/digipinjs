@@ -29,9 +29,27 @@ export class PinFormatError extends DigiPinError {
 }
 
 export class InvalidCharacterError extends DigiPinError {
-  constructor(public readonly character: string) {
-    super(`Invalid DIGIPIN character: ${character}`);
+  constructor(char: string) {
+    const suggestion = getSuggestion(char);
+    const message = suggestion
+      ? `Invalid character '${char}' in DIGIPIN. Did you mean '${suggestion}'?`
+      : `Invalid character '${char}' in DIGIPIN`;
+    super(message);
     this.name = 'InvalidCharacterError';
   }
 }
 
+function getSuggestion(char: string): string | null {
+  const map: Record<string, string> = {
+    '0': 'C', // 0 looks like C or O (not used)
+    '1': 'J', // 1 looks like J or I (not used)
+    'O': '0', // O is not used, maybe 0? (also not used, but C is close)
+    'I': 'J', // I is not used
+    'Q': '9',
+    'Z': '2',
+    'S': '5',
+    'B': '8',
+    'G': '6',
+  };
+  return map[char.toUpperCase()] || null;
+}

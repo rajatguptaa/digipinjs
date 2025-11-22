@@ -5,6 +5,15 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.3.0] - 2025-11-22
+### Added
+- **GeoJSON Support**: New `toGeoJson` utility and `--format geojson` CLI option.
+- **Smart Validation**: "Did you mean?" suggestions for invalid characters in DIGIPINs.
+- **Middleware Enhancements**: Added `onError` callback and `silent` option to Express middleware.
+
+### Changed
+- Updated all dev dependencies to latest stable versions.
+
 ## [1.1.12] - 2025-09-01
 ### Changed
 - Version bump to trigger publish via GitHub Actions using NPM_AUTH secret.
